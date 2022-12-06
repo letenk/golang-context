@@ -7,14 +7,14 @@ import (
 )
 
 func doSomething(ctx context.Context) {
-	ctxCancel, cancel := context.WithCancel(ctx)
+	deadline := time.Now().Add(1 * time.Second)
+	ctxCancel, cancel := context.WithDeadline(ctx, deadline)
+	defer cancel()
+
 	// Create new value
 	greetContext := context.WithValue(ctxCancel, "myKey", "Hola")
 	// Call function greetings and sent greetContext
 	go greetings(greetContext)
-
-	time.Sleep(3 * time.Second)
-	cancel()
 
 	// Get value from context
 	val := ctx.Value("myKey")
