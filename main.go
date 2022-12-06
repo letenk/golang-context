@@ -7,8 +7,8 @@ import (
 )
 
 func doSomething(ctx context.Context) {
-	deadline := time.Now().Add(1 * time.Second)
-	ctxCancel, cancel := context.WithDeadline(ctx, deadline)
+	duration := 1 * time.Second
+	ctxCancel, cancel := context.WithTimeout(ctx, duration)
 	defer cancel()
 
 	// Create new value
