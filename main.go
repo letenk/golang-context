@@ -3,25 +3,44 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 )
 
 func doSomething(ctx context.Context) {
+	ctxCancel, cancel := context.WithCancel(ctx)
 	// Create new value
-	greetContext := context.WithValue(ctx, "myKey", "Hola")
+	greetContext := context.WithValue(ctxCancel, "myKey", "Hola")
 	// Call function greetings and sent greetContext
-	greetings(greetContext)
+	go greetings(greetContext)
+
+	time.Sleep(3 * time.Second)
+	cancel()
 
 	// Get value from context
 	val := ctx.Value("myKey")
 	// Print value
 	fmt.Println("Value in context says:", val)
+	fmt.Printf("doSomething: finished \n")
+	time.Sleep(2 * time.Second)
 }
 
 func greetings(ctx context.Context) {
-	// Get value from context
-	val := ctx.Value("myKey")
-	// Print value
-	fmt.Println("Value context in function greetings says:", val)
+	for {
+		select {
+		case <-ctx.Done():
+			if err := ctx.Err(); err != nil {
+				fmt.Printf("greetings err: %s\n", err)
+			}
+			fmt.Printf("greetings: finished \n")
+			return
+		default:
+			// Get value from context
+			val := ctx.Value("myKey")
+			// Print value
+			fmt.Println("Value context in function greetings says:", val)
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
 }
 
 func main() {
